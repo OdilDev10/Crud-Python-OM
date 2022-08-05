@@ -1,0 +1,166 @@
+from tkinter import *
+import sqlite3
+from tkinter import messagebox
+from tkinter import filedialog
+
+def crearBase():
+	miConexion = sqlite3.connect("primeraBase")
+	miCursor=miConexion.cursor()
+	try:
+		miCursor.execute("""
+			CREATE TABLE PROVEEDORES(
+				ID INTEGER PRIMARY KEY AUTOINCREMENT,
+				NOMBRE VARCHAR(100),
+				APELLIDO VARCHAR(100),
+				DIRECCION VARCHAR(150),
+				MENSAJE TEXT
+			)
+			""")
+		messagebox.showinfo("BBDD","Base de datos creada")
+
+	except:
+		messagebox.showwarning("Atencion","Esta base de datos ya existe")
+	miConexion.close()
+
+def crearRegistro():
+	miConexion=sqlite3.connect("primeraBase")
+	miCursor = miConexion.cursor()
+
+	datos=inputNombre.get(),inputApellido.get(),inputDireccion.get(),inputMensaje.get("1.0", END)
+	miCursor.execute("INSERT INTO PROVEEDORES VALUES(NULL,?,?,?,?)",(datos) )
+
+	# miCursor.execute("INSERT INTO PROVEEDORES VALUES(NULL, '" + inputNombre.get() + 
+	# 	"', '" + inputApellido.get() +
+	# 	"', '" + inputDireccion.get() + 
+	# 	"', '" + inputMensaje.get("1.0", END) + "')")
+
+	miConexion.commit()
+	messagebox.showinfo("BBDD","Se insertaron los datos")
+	miConexion.close()
+
+def leerBase():
+
+	miConexion = sqlite3.connect("primeraBase")
+	miCursor = miConexion.cursor()
+	miCursor.execute("SELECT * FROM PROVEEDORES WHERE ID = '" + inputID.get() + "'")#no se como agregar variable
+
+	elUsuario = miCursor.fetchall()
+
+	for usuario in elUsuario:
+		miID.set(usuario[0])
+		miNombre.set(usuario[1])
+		miApellido.set(usuario[2])
+		miDireccion.set(usuario[3])
+		inputMensaje.insert(1.0, usuario[4])
+
+
+	miConexion.commit()
+	miConexion.close()
+
+def salir():
+	valor=messagebox.askquestion("Salir?","Deseas Salir?")
+	if valor == "yes":
+		raiz.destroy()
+
+def modificarBase():
+	miConexion = sqlite3.connect("primeraBase")
+	miCursor = miConexion.cursor()
+	inputID1=inputID.get()
+
+
+	datos=inputNombre.get(),inputApellido.get(),inputDireccion.get(),inputMensaje.get("1.0", END)
+	miCursor.execute("UPDATE PROVEEDORES SET NOMBRE=?, APELLIDO=?, DIRECCION=?, MENSAJE=?" + 
+		"WHERE ID =" + miID.get(), (datos))
+
+	# miCursor.execute("UPDATE PROVEEDORES SET NOMBRE='" + inputNombre.get() + 
+	# 	"', APELLIDO='" + inputApellido.get() +
+	# 	"', DIRECCION='" + inputDireccion.get() + 
+	# 	"', MENSAJE='" + inputMensaje.get("1.0", END) + 
+	# 	"' WHERE ID=" + inputID.get())
+
+	miConexion.commit()
+	messagebox.showinfo("BBDD","Se actualizo")
+	miConexion.close()	
+
+def eliminarBase():
+	miConexion = sqlite3.connect("primeraBase")
+	miCursor = miConexion.cursor()
+	inputID1=inputID.get()
+
+	miCursor.execute("DELETE FROM PROVEEDORES WHERE ID = '" + inputID.get() + "'")
+
+	miConexion.commit()
+	messagebox.showinfo("BBDD","Se elimino correctamente")
+	miConexion.close()	
+
+def limpiarCampos():
+	miID.set("")
+	miNombre.set("")
+	miApellido.set("")
+	miDireccion.set("")
+	inputMensaje.delete(1.0, END)
+
+def infoAcercaDe():
+	messagebox.showinfo("BBDD","Aplicacion 'Crud' de practica Odil Martinez")
+
+# Primero creo la ventana
+raiz=Tk();
+
+miID=StringVar()
+miNombre=StringVar()
+miApellido=StringVar()
+miDireccion=StringVar()
+
+barraMenu = Menu(raiz)
+raiz.config(menu=barraMenu)
+miFrame=Frame(raiz, width=400, height=500, bg="skyblue").pack()
+raiz.iconbitmap("crud.ico")
+raiz.title("Crud Odil Martinez")
+
+# Segundo creo los sub-menu
+crearDB = Menu(barraMenu, tearoff=0)
+crearDB.add_cascade(label="Crear DB", command=crearBase)
+crearDB.add_separator()
+crearDB.add_cascade(label="Salir", command=salir)
+
+limpiar = Menu(barraMenu, tearoff=0)
+limpiar.add_cascade(label="Limpiar", command=limpiarCampos)
+
+acercaDe = Menu(barraMenu, tearoff=0)
+acercaDe.add_cascade(label="Acerca De", command=infoAcercaDe)
+
+# Tercero los agrego a el menu principal
+barraMenu.add_cascade(label='Crear DB', menu=crearDB)
+barraMenu.add_cascade(label='Limpiar', menu=limpiar)
+barraMenu.add_cascade(label='Acerca De', menu=acercaDe)
+
+labelID=Label(miFrame, text="ID", bg="skyblue", font=("consolas")).place(x=20,y=20)
+inputID=Entry(miFrame, textvariable=miID, font=("consolas"))
+inputID.place(x=120,y=20)
+
+labelNombre=Label(miFrame, text="Nombre", bg="skyblue", font=("consolas")).place(x=20,y=60)
+inputNombre=Entry(miFrame, textvariable=miNombre, font=("consolas"))
+inputNombre.place(x=120,y=60)
+
+labelApellido=Label(miFrame, text="Apellido", bg="skyblue", font=("consolas")).place(x=20,y=100)
+inputApellido=Entry(miFrame, textvariable=miApellido, font=("consolas"))
+inputApellido.place(x=120,y=100)
+
+labelDireccion=Label(miFrame, text="Direccion", bg="skyblue", font=("consolas")).place(x=20,y=140)
+inputDireccion=Entry(miFrame, textvariable=miDireccion, font=("consolas"))
+inputDireccion.place(x=120,y=140)
+
+labelTextarea = Label(miFrame, text="Mensaje", bg="skyblue", font=("consolas")).place(x=20,y=200)
+inputMensaje = Text(miFrame, fg='red', font=("consolas", 12), width=16, height=5, pady=5)
+inputMensaje.place(x=120, y=200)
+scrollVert=Scrollbar(miFrame, command=inputMensaje)
+scrollVert.place(x=268,y=201)
+
+
+btnCrear=Button(miFrame, font=("consolas", 12), text="Crear", bg="green", command=crearRegistro).place(x=40,y=360)
+btnCrear=Button(miFrame, font=("consolas", 12), text="Leer", command=leerBase).place(x=115,y=360)
+btnCrear=Button(miFrame, font=("consolas", 12), text="Modificar", bg="yellow", command=modificarBase).place(x=180,y=360)
+btnCrear=Button(miFrame, font=("consolas", 12), text="Eliminar", bg="red", command=eliminarBase).place(x=290,y=360)
+
+
+raiz.mainloop()
