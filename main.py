@@ -364,7 +364,7 @@ miDireccion=StringVar()
 barraMenu = Menu(raiz)
 raiz.config(menu=barraMenu)
 miFrame=Frame(raiz, width=400, height=500, bg="#2BE6B9").pack()
-raiz.iconbitmap("crud.ico")
+# raiz.iconbitmap("crud.ico")
 raiz.title("Gestion proveedores")
 
 # Segundo creo los sub-menu
